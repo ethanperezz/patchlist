@@ -17,6 +17,14 @@ export default function FOHPage() {
     setChannels(prev => prev.map(ch => ch.id === updated.id ? updated : ch))
   }
 
+  function handleChannelAdded(channel: Channel) {
+    setChannels(prev => {
+      // Deduplicate — if realtime already added it, skip
+      if (prev.some(ch => ch.id === channel.id)) return prev
+      return [...prev, channel].sort((a, b) => a.sort_order - b.sort_order)
+    })
+  }
+
   if (loading) {
     return (
       <div className="space-y-4 animate-in fade-in duration-300">
@@ -65,7 +73,7 @@ export default function FOHPage() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {isEditor && <AddChannelButton showId={id} groups={groups} channelCount={channels.length} />}
+          {isEditor && <AddChannelButton showId={id} groups={groups} channelCount={channels.length} onChannelAdded={handleChannelAdded} />}
           <ChangelogDrawer changelog={changelog} />
           <PDFExportButton />
         </div>

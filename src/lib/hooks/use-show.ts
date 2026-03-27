@@ -74,7 +74,11 @@ export function useShow(showId: string) {
       .channel(`show-${showId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'channels', filter: `show_id=eq.${showId}` }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          setChannels(prev => [...prev, payload.new as Channel].sort((a, b) => a.sort_order - b.sort_order))
+          setChannels(prev => {
+            // Deduplicate — optimistic add may have already placed this
+            if (prev.some(ch => ch.id === (payload.new as Channel).id)) return prev
+            return [...prev, payload.new as Channel].sort((a, b) => a.sort_order - b.sort_order)
+          })
         } else if (payload.eventType === 'UPDATE') {
           setChannels(prev => prev.map(ch => ch.id === payload.new.id ? payload.new as Channel : ch))
         } else if (payload.eventType === 'DELETE') {
@@ -83,7 +87,10 @@ export function useShow(showId: string) {
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mixes', filter: `show_id=eq.${showId}` }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          setMixes(prev => [...prev, payload.new as Mix].sort((a, b) => a.sort_order - b.sort_order))
+          setMixes(prev => {
+            if (prev.some(m => m.id === (payload.new as Mix).id)) return prev
+            return [...prev, payload.new as Mix].sort((a, b) => a.sort_order - b.sort_order)
+          })
         } else if (payload.eventType === 'UPDATE') {
           setMixes(prev => prev.map(m => m.id === payload.new.id ? payload.new as Mix : m))
         } else if (payload.eventType === 'DELETE') {
