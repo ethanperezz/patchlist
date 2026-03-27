@@ -15,6 +15,7 @@
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
   }
+
   :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
@@ -34,12 +35,30 @@
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
+    --radius: 0.625rem;
+
+    /* Input type badge colors */
+    --badge-xlr: oklch(0.55 0.15 250);
+    --badge-di: oklch(0.55 0.15 155);
+    --badge-wireless: oklch(0.6 0.15 75);
+    --badge-line: oklch(0.55 0.15 300);
+    --badge-comms: oklch(0.6 0.15 340);
+
+    /* Mix type badge colors */
+    --badge-wedge: oklch(0.55 0.12 185);
+    --badge-iem: oklch(0.55 0.15 300);
+    --badge-fx: oklch(0.55 0.12 75);
+    --badge-matrix: oklch(0.55 0.12 30);
+
+    /* Status colors */
+    --changed: oklch(0.577 0.245 27.325);
+    --changed-bg: oklch(0.95 0.03 27);
+    --phantom: oklch(0.6 0.15 75);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -49,6 +68,7 @@
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
   }
+
   .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
@@ -68,6 +88,24 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
+
+    /* Input type badge colors - brighter for dark bg */
+    --badge-xlr: oklch(0.65 0.15 250);
+    --badge-di: oklch(0.65 0.15 155);
+    --badge-wireless: oklch(0.7 0.15 75);
+    --badge-line: oklch(0.65 0.15 300);
+    --badge-comms: oklch(0.7 0.15 340);
+
+    /* Mix type badge colors */
+    --badge-wedge: oklch(0.65 0.12 185);
+    --badge-iem: oklch(0.65 0.15 300);
+    --badge-fx: oklch(0.65 0.12 75);
+    --badge-matrix: oklch(0.65 0.12 30);
+
+    /* Status colors */
+    --changed: oklch(0.704 0.191 22.216);
+    --changed-bg: oklch(0.18 0.04 22);
+    --phantom: oklch(0.7 0.15 75);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -82,6 +120,7 @@
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
   }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -90,5 +129,93 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Print styles */
+@media print {
+  nav, .no-print, [data-no-print], button, .tabs-nav {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .print-header {
+    display: block !important;
+    border-bottom: 2px solid #000;
+    padding-bottom: 8pt;
+    margin-bottom: 12pt;
+  }
+
+  .print-header h1 {
+    font-size: 18pt;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .print-header .print-meta {
+    font-size: 10pt;
+    color: #444;
+    margin-top: 4pt;
+  }
+
+  .channel-row {
+    break-inside: avoid;
+    border-bottom: 0.5pt solid #ccc;
+    padding: 4pt 0;
+  }
+
+  .channel-row.changed {
+    border-left: 3pt solid #c00;
+    padding-left: 6pt;
+  }
+
+  .changed-label {
+    font-weight: 700;
+    color: #c00;
+    font-size: 9pt;
+    text-transform: uppercase;
+  }
+
+  .group-header {
+    font-weight: 700;
+    font-size: 12pt;
+    margin-top: 12pt;
+    margin-bottom: 4pt;
+    border-bottom: 1pt solid #000;
+  }
+
+  .badge {
+    border: 0.5pt solid #999;
+    padding: 1pt 4pt;
+    font-size: 8pt;
+    border-radius: 2pt;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 0.5pt solid #ccc;
+    padding: 3pt 6pt;
+    text-align: left;
+    font-size: 10pt;
+  }
+
+  th {
+    background: #eee !important;
+    font-weight: 600;
+  }
+
+  @page {
+    margin: 0.75in;
+    size: letter landscape;
   }
 }
