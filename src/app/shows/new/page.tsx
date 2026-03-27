@@ -18,6 +18,7 @@ export default function NewShowPage() {
   const [showDate, setShowDate] = useState('')
   const [eventType, setEventType] = useState('worship')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [templates, setTemplates] = useState<any[]>([])
   const [templatesLoaded, setTemplatesLoaded] = useState(false)
   const router = useRouter()
@@ -33,67 +34,60 @@ export default function NewShowPage() {
     setTemplatesLoaded(true)
   }
 
-  async function createBlankShow() {
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+  // Helper: create show with client-generated UUID to avoid SELECT-after-INSERT RLS issue
+  async function createShowRecord(userId: string): Promise<string | null> {
+    const showId = crypto.randomUUID()
 
-    const { data: show, error } = await supabase
-      .from('shows')
-      .insert({
-        name: name || 'Untitled Show',
-        venue: venue || null,
-        show_date: showDate || null,
-        event_type: eventType,
-        created_by: user.id,
-      })
-      .select()
-      .single()
+    // Insert show (no .select() — RLS blocks reading before show_users exists)
+    const { error: showErr } = await supabase.from('shows').insert({
+      id: showId,
+      name: name || 'Untitled Show',
+      venue: venue || null,
+      show_date: showDate || null,
+      event_type: eventType,
+      created_by: userId,
+    })
 
-    if (error || !show) {
-      setLoading(false)
-      return
+    if (showErr) {
+      setError('Failed to create show: ' + showErr.message)
+      return null
     }
 
-    // Add creator as editor
-    await supabase.from('show_users').insert({
-      show_id: show.id,
-      user_id: user.id,
+    // Add creator as editor (must happen before any further reads)
+    const { error: suErr } = await supabase.from('show_users').insert({
+      show_id: showId,
+      user_id: userId,
       permission: 'editor',
     })
 
-    router.push(`/shows/${show.id}/foh`)
+    if (suErr) {
+      setError('Failed to set permissions: ' + suErr.message)
+      return null
+    }
+
+    return showId
+  }
+
+  async function createBlankShow() {
+    setLoading(true)
+    setError(null)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setLoading(false); return }
+
+    const showId = await createShowRecord(user.id)
+    if (!showId) { setLoading(false); return }
+
+    router.push(`/shows/${showId}/foh`)
   }
 
   async function cloneTemplate(templateId: string) {
     setLoading(true)
+    setError(null)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) { setLoading(false); return }
 
-    // Create the show
-    const { data: show, error } = await supabase
-      .from('shows')
-      .insert({
-        name: name || 'Untitled Show',
-        venue: venue || null,
-        show_date: showDate || null,
-        event_type: eventType,
-        created_by: user.id,
-      })
-      .select()
-      .single()
-
-    if (error || !show) {
-      setLoading(false)
-      return
-    }
-
-    // Add creator as editor
-    await supabase.from('show_users').insert({
-      show_id: show.id,
-      user_id: user.id,
-      permission: 'editor',
-    })
+    const showId = await createShowRecord(user.id)
+    if (!showId) { setLoading(false); return }
 
     // Clone channel groups
     const { data: srcGroups } = await supabase
@@ -105,16 +99,14 @@ export default function NewShowPage() {
     const groupMap: Record<string, string> = {}
     if (srcGroups && srcGroups.length > 0) {
       for (const g of srcGroups) {
-        const { data: newGroup } = await supabase
-          .from('channel_groups')
-          .insert({
-            show_id: show.id,
-            name: g.name,
-            sort_order: g.sort_order,
-          })
-          .select()
-          .single()
-        if (newGroup) groupMap[g.id] = newGroup.id
+        const newGroupId = crypto.randomUUID()
+        await supabase.from('channel_groups').insert({
+          id: newGroupId,
+          show_id: showId,
+          name: g.name,
+          sort_order: g.sort_order,
+        })
+        groupMap[g.id] = newGroupId
       }
     }
 
@@ -128,7 +120,7 @@ export default function NewShowPage() {
     if (srcChannels && srcChannels.length > 0) {
       await supabase.from('channels').insert(
         srcChannels.map(ch => ({
-          show_id: show.id,
+          show_id: showId,
           channel_number: ch.channel_number,
           name: ch.name,
           stage_port: ch.stage_port,
@@ -152,7 +144,7 @@ export default function NewShowPage() {
     if (srcMixes && srcMixes.length > 0) {
       await supabase.from('mixes').insert(
         srcMixes.map(m => ({
-          show_id: show.id,
+          show_id: showId,
           mix_number: m.mix_number,
           name: m.name,
           type: m.type,
@@ -164,40 +156,21 @@ export default function NewShowPage() {
       )
     }
 
-    router.push(`/shows/${show.id}/foh`)
+    router.push(`/shows/${showId}/foh`)
   }
 
   async function handleCSVImport(rows: any[]) {
     setLoading(true)
+    setError(null)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) { setLoading(false); return }
 
-    const { data: show, error } = await supabase
-      .from('shows')
-      .insert({
-        name: name || 'Untitled Show',
-        venue: venue || null,
-        show_date: showDate || null,
-        event_type: eventType,
-        created_by: user.id,
-      })
-      .select()
-      .single()
-
-    if (error || !show) {
-      setLoading(false)
-      return
-    }
-
-    await supabase.from('show_users').insert({
-      show_id: show.id,
-      user_id: user.id,
-      permission: 'editor',
-    })
+    const showId = await createShowRecord(user.id)
+    if (!showId) { setLoading(false); return }
 
     await supabase.from('channels').insert(
       rows.map((row, i) => ({
-        show_id: show.id,
+        show_id: showId,
         channel_number: row.channel_number || i + 1,
         name: row.name || `Ch ${i + 1}`,
         stage_port: row.stage_port || null,
@@ -209,7 +182,7 @@ export default function NewShowPage() {
       }))
     )
 
-    router.push(`/shows/${show.id}/foh`)
+    router.push(`/shows/${showId}/foh`)
   }
 
   return (
@@ -217,6 +190,12 @@ export default function NewShowPage() {
       <NavBar />
       <main className="mx-auto max-w-2xl p-4 pt-6">
         <h1 className="mb-6 text-xl font-bold tracking-tight">New Show</h1>
+
+        {error && (
+          <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
 
         <div className="space-y-4 mb-6">
           <div className="grid grid-cols-2 gap-4">
