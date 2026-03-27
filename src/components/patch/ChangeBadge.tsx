@@ -55,13 +55,7 @@ export function MixTypeBadge({ type }: { type: MixType | null }) {
 
 export function PhantomBadge() {
   return (
-    <span
-      className="inline-flex items-center rounded px-1 py-0.5 text-[9px] font-bold tracking-wider"
-      style={{
-        color: 'var(--phantom)',
-        backgroundColor: `color-mix(in srgb, var(--phantom) 12%, transparent)`,
-      }}
-    >
+    <span className="inline-flex items-center rounded px-1 py-0.5 text-[9px] font-bold tracking-wider text-red-500 bg-red-500/10">
       48V
     </span>
   )
