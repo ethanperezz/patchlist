@@ -4,6 +4,8 @@ import { NavBar } from '@/components/nav-bar'
 import { RoleTabBar } from '@/components/patch/RoleTabBar'
 import { ShowHeader } from '@/components/patch/ShowHeader'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ShowLayout({
   children,
   params,

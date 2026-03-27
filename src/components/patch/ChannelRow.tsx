@@ -63,7 +63,7 @@ export function ChannelRow({ channel, changes, isEditor, onUpdate }: ChannelRowP
     if (editing === field) {
       if (field === 'input_type') {
         return (
-          <Select value={editValue} onValueChange={(v) => { setEditValue(v); setEditing(null); const trimmed = v; const updated = { ...channel, [field]: trimmed || null }; onUpdate(updated); supabase.from('channels').update({ [field]: trimmed || null }).eq('id', channel.id) }}>
+          <Select value={editValue} onValueChange={(v) => { setEditValue(v); setEditing(null); const updated = { ...channel, input_type: (v as InputType) || null }; onUpdate(updated); supabase.from('channels').update({ input_type: v || null }).eq('id', channel.id) }}>
             <SelectTrigger className="h-6 w-24 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="xlr_mic">XLR Mic</SelectItem>

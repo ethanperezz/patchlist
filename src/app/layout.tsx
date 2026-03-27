@@ -4,9 +4,6 @@ import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { cn } from '@/lib/utils'
 import { ThemeScript } from '@/components/theme-script'
-import { Geist } from "next/font/google";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -35,11 +32,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={cn(geistSans.variable, geistMono.variable, "font-sans", geist.variable)} suppressHydrationWarning>
+    <html lang="en" className={cn(geistSans.variable, geistMono.variable)} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
-      <body className="antialiased min-h-screen">
+      <body className="antialiased min-h-screen font-sans">
         <ThemeProvider>
           {children}
         </ThemeProvider>
