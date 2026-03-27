@@ -141,15 +141,23 @@ export function ChannelRow({ channel, changes, isEditor, onUpdate }: ChannelRowP
 
       {/* Phantom */}
       <div
-        className={cn('flex justify-center', isEditor && 'cursor-pointer')}
+        className={cn(
+          'flex justify-center items-center h-6',
+          isEditor && 'cursor-pointer rounded transition-colors hover:bg-accent/80'
+        )}
         onClick={() => {
           if (!isEditor) return
           const updated = { ...channel, phantom_48v: !channel.phantom_48v }
           onUpdate(updated)
           supabase.from('channels').update({ phantom_48v: !channel.phantom_48v }).eq('id', channel.id)
         }}
+        title={isEditor ? (channel.phantom_48v ? 'Disable 48V' : 'Enable 48V') : undefined}
       >
-        {channel.phantom_48v && <PhantomBadge />}
+        {channel.phantom_48v ? (
+          <PhantomBadge />
+        ) : (
+          isEditor && <span className="text-[9px] text-muted-foreground/20">48V</span>
+        )}
       </div>
 
       {/* Notes + change note */}
