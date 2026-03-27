@@ -34,21 +34,31 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">PatchList</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      {/* Subtle background texture */}
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_30%,hsl(var(--muted))_0%,transparent_70%)] opacity-50" />
+
+      <div className="mb-8 flex items-center gap-2.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-foreground text-background text-xs font-bold tracking-tighter">
+          PL
+        </div>
+        <span className="text-lg font-bold tracking-tight">PatchList</span>
+      </div>
+
+      <Card className="w-full max-w-sm border-border/50 shadow-sm">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-base font-semibold">Sign in</CardTitle>
+          <CardDescription className="text-xs">Enter your credentials to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
-              <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+              <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-xs text-destructive">
                 {error}
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -57,31 +67,36 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 required
                 autoFocus
+                className="h-9 text-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-xs">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
                 required
+                className="h-9 text-sm"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full h-9 text-sm font-medium" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="mt-5 text-center text-[11px] text-muted-foreground">
             No account?{' '}
-            <Link href="/signup" className="text-foreground underline underline-offset-4 hover:text-primary">
+            <Link href="/signup" className="text-foreground underline underline-offset-4 hover:text-primary transition-colors">
               Sign up
             </Link>
           </p>
         </CardContent>
       </Card>
+
+      <p className="mt-6 text-[10px] text-muted-foreground/50">
+        Live production patch list manager
+      </p>
     </div>
   )
 }

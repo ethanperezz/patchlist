@@ -5,67 +5,70 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 97%;
-    --card-foreground: 0 0% 9%;
+    --foreground: 220 15% 12%;
+    --card: 220 10% 97%;
+    --card-foreground: 220 15% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 0 0% 13%;
+    --popover-foreground: 220 15% 12%;
+    --primary: 220 15% 12%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 94%;
-    --secondary-foreground: 0 0% 13%;
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 13%;
+    --secondary: 220 8% 94%;
+    --secondary-foreground: 220 15% 12%;
+    --muted: 220 8% 94%;
+    --muted-foreground: 220 8% 46%;
+    --accent: 220 8% 94%;
+    --accent-foreground: 220 15% 12%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89%;
-    --input: 0 0% 89%;
-    --ring: 0 0% 55%;
+    --border: 220 8% 88%;
+    --input: 220 8% 88%;
+    --ring: 220 8% 55%;
     --radius: 0.5rem;
 
     /* Input type badge colors */
-    --badge-xlr: #3b82f6;
-    --badge-di: #22c55e;
-    --badge-wireless: #f59e0b;
-    --badge-line: #a855f7;
-    --badge-comms: #ec4899;
+    --badge-xlr: #2563eb;
+    --badge-di: #16a34a;
+    --badge-wireless: #d97706;
+    --badge-line: #9333ea;
+    --badge-comms: #db2777;
 
     /* Mix type badge colors */
-    --badge-wedge: #14b8a6;
-    --badge-iem: #a855f7;
-    --badge-fx: #f59e0b;
-    --badge-matrix: #f97316;
+    --badge-wedge: #0d9488;
+    --badge-iem: #9333ea;
+    --badge-fx: #d97706;
+    --badge-matrix: #ea580c;
 
     /* Status colors */
-    --changed: #ef4444;
+    --changed: #dc2626;
     --changed-bg: #fef2f2;
-    --phantom: #f59e0b;
+    --phantom: #d97706;
+
+    /* Accent — warm amber for "active" states */
+    --accent-warm: #d97706;
   }
 
   .dark {
-    --background: 0 0% 6%;
-    --foreground: 40 6% 90%;
-    --card: 0 0% 9%;
-    --card-foreground: 40 6% 90%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 40 6% 90%;
-    --primary: 40 6% 90%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 40 6% 90%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 50%;
-    --accent: 0 0% 15%;
-    --accent-foreground: 40 6% 90%;
-    --destructive: 0 72% 51%;
+    --background: 220 15% 5%;
+    --foreground: 40 8% 88%;
+    --card: 220 12% 8%;
+    --card-foreground: 40 8% 88%;
+    --popover: 220 12% 8%;
+    --popover-foreground: 40 8% 88%;
+    --primary: 40 8% 88%;
+    --primary-foreground: 220 15% 5%;
+    --secondary: 220 10% 14%;
+    --secondary-foreground: 40 8% 88%;
+    --muted: 220 10% 14%;
+    --muted-foreground: 220 5% 52%;
+    --accent: 220 10% 14%;
+    --accent-foreground: 40 8% 88%;
+    --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 38%;
+    --border: 220 10% 16%;
+    --input: 220 10% 16%;
+    --ring: 220 5% 35%;
 
-    /* Input type badge colors - brighter for dark */
+    /* Input type badge colors — luminous on dark */
     --badge-xlr: #60a5fa;
     --badge-di: #4ade80;
     --badge-wireless: #fbbf24;
@@ -80,19 +83,85 @@
 
     /* Status colors */
     --changed: #f87171;
-    --changed-bg: rgba(239, 68, 68, 0.1);
+    --changed-bg: rgba(239, 68, 68, 0.08);
     --phantom: #fbbf24;
+
+    --accent-warm: #fbbf24;
   }
 
   * {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }
 
-/* Print styles */
+/* ============================================================
+   COMPONENT LAYER
+   ============================================================ */
+@layer components {
+  /* Smooth transitions on all interactive elements */
+  .transition-base {
+    @apply transition-all duration-150 ease-out;
+  }
+
+  /* Stat pill used in FOH summary row */
+  .stat-pill {
+    @apply inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs tabular-nums;
+  }
+
+  /* Channel row hover/active */
+  .channel-row-interactive {
+    @apply transition-colors duration-100 hover:bg-accent/60;
+  }
+
+  /* Editable cell indicator */
+  .editable-cell {
+    @apply cursor-pointer rounded px-1 -mx-1 transition-colors duration-100;
+  }
+  .editable-cell:hover {
+    @apply bg-accent/80;
+  }
+
+  /* Group header bar */
+  .group-header-bar {
+    @apply flex w-full items-center gap-2 rounded-t-md bg-muted/50 px-3 py-2 text-left border-b;
+  }
+
+  /* Feed chip in monitor view */
+  .feed-chip {
+    @apply inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium tabular-nums transition-colors;
+  }
+
+  /* Mix card */
+  .mix-card-header {
+    @apply flex items-center gap-2 flex-wrap;
+  }
+}
+
+/* ============================================================
+   UTILITY LAYER
+   ============================================================ */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Tabular nums for channel numbers, frequencies, etc. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Subtle text glow for emphasis in dark mode */
+  .dark .text-glow {
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.15);
+  }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
 @media print {
   nav, .no-print, [data-no-print], button, .tabs-nav {
     display: none !important;

@@ -6,7 +6,6 @@ import { ChannelGroup } from '@/components/patch/ChannelGroup'
 import { ChangelogDrawer } from '@/components/patch/ChangelogDrawer'
 import { PDFExportButton } from '@/components/patch/PDFExportButton'
 import { AddChannelButton } from '@/components/patch/AddChannelButton'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Channel } from '@/lib/types'
 
@@ -20,10 +19,16 @@ export default function FOHPage() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-[200px] w-full" />
-        <Skeleton className="h-[200px] w-full" />
+      <div className="space-y-4 animate-in fade-in duration-300">
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-28" />
+          <Skeleton className="h-10 w-28" />
+          <Skeleton className="h-10 w-28" />
+        </div>
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-[180px] w-full" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-[120px] w-full" />
       </div>
     )
   }
@@ -36,7 +41,6 @@ export default function FOHPage() {
     groupedChannels.get(key)!.push(ch)
   }
 
-  // Order groups by sort_order, ungrouped last
   const orderedGroups = [...groups]
   const ungrouped = groupedChannels.get(null) || []
 
@@ -45,26 +49,21 @@ export default function FOHPage() {
 
   return (
     <div>
-      {/* Stats row */}
-      <div className="mb-4 flex flex-wrap items-center gap-4 no-print">
-        <div className="flex items-center gap-6 text-xs">
-          <div>
-            <span className="text-muted-foreground">Inputs: </span>
-            <span className="font-medium">{channels.length}</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Wireless: </span>
-            <span className="font-medium">{wirelessCount}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-muted-foreground">Changes: </span>
-            {changeCount > 0 ? (
-              <Badge variant="destructive" className="h-4 px-1.5 text-[10px]">{changeCount}</Badge>
-            ) : (
-              <span className="font-medium">0</span>
-            )}
-          </div>
+      {/* Stats + actions row */}
+      <div className="mb-5 flex flex-wrap items-center gap-3 no-print">
+        <div className="stat-pill bg-card">
+          <span className="text-muted-foreground">Inputs</span>
+          <span className="font-semibold tabular-nums">{channels.length}</span>
         </div>
+        <div className="stat-pill bg-card">
+          <span className="text-muted-foreground">Wireless</span>
+          <span className="font-semibold tabular-nums">{wirelessCount}</span>
+        </div>
+        <div className={`stat-pill ${changeCount > 0 ? 'border-[var(--changed)]/30 bg-[var(--changed-bg)]' : 'bg-card'}`}>
+          <span className={changeCount > 0 ? 'text-[var(--changed)]' : 'text-muted-foreground'}>Changes</span>
+          <span className={`font-semibold tabular-nums ${changeCount > 0 ? 'text-[var(--changed)]' : ''}`}>{changeCount}</span>
+        </div>
+
         <div className="ml-auto flex items-center gap-2">
           {isEditor && <AddChannelButton showId={id} groups={groups} channelCount={channels.length} />}
           <ChangelogDrawer changelog={changelog} />
@@ -73,8 +72,8 @@ export default function FOHPage() {
       </div>
 
       {/* Column header */}
-      <div className="mb-1 grid grid-cols-[3rem_1fr_5rem_4rem_6rem_2rem_1fr] gap-2 px-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-        <span className="text-right pr-2">Ch</span>
+      <div className="mb-1 grid grid-cols-[2.5rem_1fr_4.5rem_3.5rem_6rem_2rem_1fr] gap-2 px-3 text-[10px] font-medium uppercase tracking-widest text-muted-foreground/50">
+        <span className="text-right pr-1">Ch</span>
         <span>Name</span>
         <span>Port</span>
         <span>Type</span>
@@ -107,8 +106,11 @@ export default function FOHPage() {
       )}
 
       {channels.length === 0 && (
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">No channels yet</p>
+        <div className="mt-12 flex flex-col items-center text-center">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          </div>
+          <p className="text-sm font-medium">No channels yet</p>
           {isEditor && (
             <p className="mt-1 text-xs text-muted-foreground">
               Add your first channel to start building the patch list

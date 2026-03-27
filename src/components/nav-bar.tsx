@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { Separator } from '@/components/ui/separator'
 
 export function NavBar({ userName }: { userName?: string | null }) {
   const router = useRouter()
@@ -17,17 +18,28 @@ export function NavBar({ userName }: { userName?: string | null }) {
   }
 
   return (
-    <nav className="border-b no-print">
-      <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="text-sm font-bold tracking-tight">
-          PatchList
+    <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md no-print">
+      <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-4">
+        <Link href="/" className="group flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-foreground text-background text-[10px] font-bold tracking-tighter">
+            PL
+          </div>
+          <span className="text-sm font-semibold tracking-tight opacity-70 group-hover:opacity-100 transition-opacity">
+            PatchList
+          </span>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {userName && (
-            <span className="text-xs text-muted-foreground">{userName}</span>
+            <span className="mr-2 text-[11px] text-muted-foreground tracking-tight">{userName}</span>
           )}
           <ThemeToggle />
-          <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-xs">
+          <Separator orientation="vertical" className="mx-1 h-4" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+          >
             Sign out
           </Button>
         </div>

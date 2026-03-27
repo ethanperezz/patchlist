@@ -25,34 +25,41 @@ export function ChannelGroup({ group, channels, changelog, isEditor, onUpdateCha
     }
   }
 
+  const changedCount = channels.filter(ch => groupChanges.has(ch.id)).length
+
   return (
-    <div className="mb-3">
+    <div className="mb-4">
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="group-header flex w-full items-center gap-2 px-2 py-1.5 text-left"
+        className="group-header-bar cursor-pointer transition-colors hover:bg-muted/80"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="12"
-          height="12"
+          width="10"
+          height="10"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={cn('shrink-0 transition-transform', collapsed && '-rotate-90')}
+          className={cn('shrink-0 text-muted-foreground transition-transform duration-150', collapsed && '-rotate-90')}
         >
           <path d="m6 9 6 6 6-6"/>
         </svg>
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
           {group?.name || 'Ungrouped'}
         </span>
-        <span className="text-[10px] text-muted-foreground/60">{channels.length}</span>
+        <span className="text-[10px] tabular-nums text-muted-foreground/50">{channels.length}</span>
+        {changedCount > 0 && (
+          <span className="ml-auto text-[10px] font-medium tabular-nums" style={{ color: 'var(--changed)' }}>
+            {changedCount} changed
+          </span>
+        )}
       </button>
 
       {!collapsed && (
-        <div className="rounded border">
+        <div className="rounded-b-md border border-t-0 divide-y divide-border/50">
           {channels.map(ch => (
             <ChannelRow
               key={ch.id}
@@ -63,7 +70,7 @@ export function ChannelGroup({ group, channels, changelog, isEditor, onUpdateCha
             />
           ))}
           {channels.length === 0 && (
-            <p className="px-4 py-3 text-xs text-muted-foreground">No channels in this group</p>
+            <p className="px-4 py-6 text-center text-xs text-muted-foreground/60">No channels in this group</p>
           )}
         </div>
       )}
