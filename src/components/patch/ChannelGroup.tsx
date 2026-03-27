@@ -3,17 +3,21 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { ChannelRow } from './ChannelRow'
+import { QuickAddRow } from './QuickAddRow'
 import type { Channel, ChannelGroup as ChannelGroupType, ChangelogEntry } from '@/lib/types'
 
 interface ChannelGroupProps {
+  showId: string
   group: ChannelGroupType | null
   channels: Channel[]
   changelog: ChangelogEntry[]
   isEditor: boolean
+  totalChannelCount: number
   onUpdateChannel: (updated: Channel) => void
+  onChannelAdded: (channel: Channel) => void
 }
 
-export function ChannelGroup({ group, channels, changelog, isEditor, onUpdateChannel }: ChannelGroupProps) {
+export function ChannelGroup({ showId, group, channels, changelog, isEditor, totalChannelCount, onUpdateChannel, onChannelAdded }: ChannelGroupProps) {
   const [collapsed, setCollapsed] = useState(false)
 
   const groupChanges = new Map<string, ChangelogEntry[]>()
@@ -69,8 +73,16 @@ export function ChannelGroup({ group, channels, changelog, isEditor, onUpdateCha
               onUpdate={onUpdateChannel}
             />
           ))}
-          {channels.length === 0 && (
+          {channels.length === 0 && !isEditor && (
             <p className="px-4 py-6 text-center text-xs text-muted-foreground/60">No channels in this group</p>
+          )}
+          {isEditor && (
+            <QuickAddRow
+              showId={showId}
+              groupId={group?.id || null}
+              channelCount={totalChannelCount}
+              onChannelAdded={onChannelAdded}
+            />
           )}
         </div>
       )}
