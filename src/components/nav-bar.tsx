@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -21,9 +22,13 @@ export function NavBar({ userName }: { userName?: string | null }) {
     <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md no-print">
       <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="group flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded bg-foreground text-background text-[10px] font-bold tracking-tighter">
-            PL
-          </div>
+          <Image
+            src="/logo.png"
+            alt="PatchList"
+            width={22}
+            height={22}
+            className="dark:invert-0 invert"
+          />
           <span className="text-sm font-semibold tracking-tight opacity-70 group-hover:opacity-100 transition-opacity">
             PatchList
           </span>

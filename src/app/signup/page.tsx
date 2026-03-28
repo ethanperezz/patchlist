@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -53,9 +54,7 @@ export default function SignupPage() {
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_30%,hsl(var(--muted))_0%,transparent_70%)] opacity-50" />
 
       <div className="mb-8 flex items-center gap-2.5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-foreground text-background text-xs font-bold tracking-tighter">
-          PL
-        </div>
+        <Image src="/logo.png" alt="PatchList" width={32} height={32} className="dark:invert-0 invert" />
         <span className="text-lg font-bold tracking-tight">PatchList</span>
       </div>
 
