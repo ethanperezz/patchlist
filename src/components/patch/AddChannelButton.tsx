@@ -58,12 +58,12 @@ export const AddChannelButton = forwardRef<{ open: () => void }, AddChannelButto
         id,
         show_id: showId,
         channel_number: newChannel.channel_number,
-        name: newChannel.name,
+        name: newChannel.name || '',
         input_type: newChannel.input_type,
         mic_model: newChannel.mic_model,
         group_id: newChannel.group_id,
         sort_order: newChannel.sort_order,
-      })
+      }).then(({ error }) => { if (error) console.error('Failed to insert channel:', error.message) })
 
       if (addAnother) {
         // Keep dialog open, clear name and mic, keep group and type

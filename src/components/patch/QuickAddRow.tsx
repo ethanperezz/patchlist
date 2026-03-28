@@ -73,17 +73,18 @@ export function QuickAddRow({ showId, groupId, channelCount, onChannelAdded, aut
     nameRef.current?.focus()
 
     // Persist
-    await supabase.from('channels').insert({
+    const { error } = await supabase.from('channels').insert({
       id,
       show_id: showId,
       channel_number: newChannel.channel_number,
-      name: newChannel.name,
+      name: newChannel.name || '',
       stage_port: newChannel.stage_port,
       input_type: newChannel.input_type,
       mic_model: newChannel.mic_model,
       group_id: newChannel.group_id,
       sort_order: newChannel.sort_order,
     })
+    if (error) console.error('Failed to insert channel:', error.message)
   }
 
   // Called when mic is selected from dropdown — auto-submit
@@ -109,10 +110,10 @@ export function QuickAddRow({ showId, groupId, channelCount, onChannelAdded, aut
     nameRef.current?.focus()
     supabase.from('channels').insert({
       id, show_id: showId, channel_number: newChannel.channel_number,
-      name: newChannel.name, stage_port: newChannel.stage_port,
+      name: newChannel.name || '', stage_port: newChannel.stage_port,
       input_type: newChannel.input_type, mic_model: newChannel.mic_model,
       group_id: newChannel.group_id, sort_order: newChannel.sort_order,
-    })
+    }).then(({ error }) => { if (error) console.error('Failed to insert channel:', error.message) })
   }
 
   function handleKeyDown(e: React.KeyboardEvent, field: 'name' | 'port') {

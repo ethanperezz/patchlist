@@ -28,6 +28,18 @@ export function ChannelRow({ channel, changes, isEditor, onUpdate }: ChannelRowP
     setEditValue(value || '')
   }, [isEditor])
 
+  async function persistUpdate(field: string, value: any) {
+    const { error } = await supabase
+      .from('channels')
+      .update({ [field]: value })
+      .eq('id', channel.id)
+
+    if (error) {
+      console.error(`Failed to update channel ${channel.id} field ${field}:`, error.message)
+      onUpdate(channel) // rollback
+    }
+  }
+
   async function saveEdit(field: string) {
     setEditing(null)
     const trimmed = editValue.trim()
@@ -37,17 +49,15 @@ export function ChannelRow({ channel, changes, isEditor, onUpdate }: ChannelRowP
     if (field === 'phantom_48v') newVal = trimmed === 'true'
     else if (field === 'channel_number' || field === 'sort_order') newVal = parseInt(trimmed) || 0
 
-    if (String(currentVal || '') === String(newVal || '')) return
+    // For text fields: keep empty string as empty string, not null
+    // For name: must be non-null (DB constraint)
+    const dbVal = field === 'name' ? (newVal || '') : (newVal || null)
 
-    const updated = { ...channel, [field]: newVal || null }
+    if (String(currentVal ?? '') === String(dbVal ?? '')) return
+
+    const updated = { ...channel, [field]: dbVal }
     onUpdate(updated)
-
-    const { error } = await supabase
-      .from('channels')
-      .update({ [field]: newVal || null })
-      .eq('id', channel.id)
-
-    if (error) onUpdate(channel)
+    persistUpdate(field, dbVal)
   }
 
   function handleKeyDown(e: React.KeyboardEvent, field: string) {
@@ -116,11 +126,10 @@ export function ChannelRow({ channel, changes, isEditor, onUpdate }: ChannelRowP
           <Select
             value={editValue}
             onValueChange={(v) => {
-              setEditValue(v)
               setEditing(null)
               const updated = { ...channel, input_type: (v as InputType) || null }
               onUpdate(updated)
-              supabase.from('channels').update({ input_type: v }).eq('id', channel.id)
+              persistUpdate('input_type', v || null)
             }}
           >
             <SelectTrigger className="h-6 w-20 text-xs"><SelectValue /></SelectTrigger>
@@ -143,10 +152,11 @@ export function ChannelRow({ channel, changes, isEditor, onUpdate }: ChannelRowP
           value={channel.mic_model}
           onChange={(v) => {
             setEditing(null)
-            if (v === (channel.mic_model || '')) return
-            const updated = { ...channel, mic_model: v || null }
+            const newMic = v || null
+            if (newMic === (channel.mic_model || null)) return
+            const updated = { ...channel, mic_model: newMic }
             onUpdate(updated)
-            supabase.from('channels').update({ mic_model: v || null }).eq('id', channel.id)
+            persistUpdate('mic_model', newMic)
           }}
           compact
         />
@@ -169,7 +179,7 @@ export function ChannelRow({ channel, changes, isEditor, onUpdate }: ChannelRowP
           if (!isEditor) return
           const updated = { ...channel, phantom_48v: !channel.phantom_48v }
           onUpdate(updated)
-          supabase.from('channels').update({ phantom_48v: !channel.phantom_48v }).eq('id', channel.id)
+          persistUpdate('phantom_48v', !channel.phantom_48v)
         }}
         title={isEditor ? (channel.phantom_48v ? 'Disable 48V' : 'Enable 48V') : undefined}
       >

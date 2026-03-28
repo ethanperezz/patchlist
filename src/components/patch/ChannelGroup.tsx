@@ -41,7 +41,7 @@ export function ChannelGroup({ showId, group, channels, changelog, isEditor, tot
     supabase.from('channels').insert({
       id, show_id: showId, channel_number: blank.channel_number,
       name: '', group_id: blank.group_id, sort_order: blank.sort_order,
-    })
+    }).then(({ error }) => { if (error) console.error('Failed to insert blank channel:', error.message) })
   }
 
   const groupChanges = new Map<string, ChangelogEntry[]>()
