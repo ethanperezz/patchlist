@@ -59,12 +59,19 @@ export function MicSelect({ value, onChange, className, placeholder = 'Select mi
       setHighlighted(prev => Math.max(prev - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      if (results[highlighted]) {
+      if (!query.trim()) {
+        // Enter on empty = clear the mic
+        onChange('')
+        setOpen(false)
+      } else if (results[highlighted]) {
         handleSelect(results[highlighted])
       } else if (query.trim()) {
-        // Allow custom mic not in the list
         handleSelect(query.trim())
       }
+    } else if (e.key === 'Backspace' && !query) {
+      // Backspace on empty clears the value
+      onChange('')
+      setOpen(false)
     } else if (e.key === 'Escape') {
       setOpen(false)
       setQuery('')
@@ -104,6 +111,15 @@ export function MicSelect({ value, onChange, className, placeholder = 'Select mi
           ref={listRef}
           className="absolute left-0 top-full z-50 mt-1 max-h-48 w-64 overflow-auto rounded-md border bg-popover shadow-md"
         >
+          {/* Clear option */}
+          {value && !query && (
+            <button
+              className="flex w-full items-center px-3 py-1.5 text-left text-xs text-muted-foreground hover:bg-accent/50 cursor-pointer border-b border-border/50"
+              onClick={() => { onChange(''); setOpen(false); setQuery('') }}
+            >
+              None (clear)
+            </button>
+          )}
           {results.length === 0 ? (
             <div className="px-3 py-6 text-center text-xs text-muted-foreground">
               {query ? (
