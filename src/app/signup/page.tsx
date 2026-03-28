@@ -54,7 +54,7 @@ export default function SignupPage() {
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_30%,hsl(var(--muted))_0%,transparent_70%)] opacity-50" />
 
       <div className="mb-8">
-        <Image src="/logo.png" alt="PatchList" width={200} height={200} className="dark:invert-0 invert h-24 w-auto" />
+        <Image src="/logo.png" alt="PatchList" width={200} height={200} className="dark:invert-0 invert h-[100px] w-auto" />
       </div>
 
       <Card className="w-full max-w-sm border-border/50 shadow-sm">
