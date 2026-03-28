@@ -20,7 +20,7 @@ export function RoleTabBar({ showId, isEditor }: { showId: string; isEditor: boo
   const visibleTabs = isEditor ? tabs : tabs.filter(t => t.href !== 'settings')
 
   return (
-    <div className="tabs-nav sticky top-11 z-40 border-b bg-background/80 backdrop-blur-md no-print">
+    <div className="tabs-nav sticky top-16 z-40 border-b bg-background/80 backdrop-blur-md no-print">
       <div className="mx-auto flex max-w-7xl gap-0 overflow-x-auto px-4">
         {visibleTabs.map(tab => (
           <Link

@@ -20,14 +20,14 @@ export function NavBar({ userName }: { userName?: string | null }) {
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md no-print">
-      <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-4">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="group flex items-center">
           <Image
             src="/logo.png"
             alt="PatchList"
             width={100}
             height={100}
-            className="dark:invert-0 invert h-14 w-auto opacity-80 group-hover:opacity-100 transition-opacity"
+            className="dark:invert-0 invert h-[100px] w-auto opacity-80 group-hover:opacity-100 transition-opacity"
           />
         </Link>
         <div className="flex items-center gap-1">
