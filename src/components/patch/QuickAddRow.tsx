@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
+import { MicSelect } from './MicSelect'
 import type { Channel, InputType } from '@/lib/types'
 
 interface QuickAddRowProps {
@@ -30,7 +31,6 @@ export function QuickAddRow({ showId, groupId, channelCount, onChannelAdded, aut
   const [active, setActive] = useState(false)
   const nameRef = useRef<HTMLInputElement>(null)
   const portRef = useRef<HTMLInputElement>(null)
-  const micRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -86,18 +86,48 @@ export function QuickAddRow({ showId, groupId, channelCount, onChannelAdded, aut
     })
   }
 
-  function handleKeyDown(e: React.KeyboardEvent, field: 'name' | 'port' | 'type' | 'mic') {
+  // Called when mic is selected from dropdown — auto-submit
+  function handleSubmitAfterMic(selectedMic: string) {
+    if (!name.trim()) return
+    // Use the selected mic value directly since setState is async
+    const id = crypto.randomUUID()
+    const newChannel: Channel = {
+      id,
+      show_id: showId,
+      channel_number: channelCount + 1,
+      name: name.trim(),
+      stage_port: port.trim() || null,
+      input_type: inputType,
+      mic_model: selectedMic || null,
+      phantom_48v: false,
+      notes: null,
+      sort_order: channelCount,
+      group_id: groupId,
+    }
+    onChannelAdded(newChannel)
+    setName('')
+    setPort('')
+    setMic('')
+    nameRef.current?.focus()
+    supabase.from('channels').insert({
+      id, show_id: showId, channel_number: newChannel.channel_number,
+      name: newChannel.name, stage_port: newChannel.stage_port,
+      input_type: newChannel.input_type, mic_model: newChannel.mic_model,
+      group_id: newChannel.group_id, sort_order: newChannel.sort_order,
+    })
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent, field: 'name' | 'port') {
     if (e.key === 'Enter') {
       e.preventDefault()
       if (field === 'name' && !name.trim()) return
-      if (field === 'mic' || (field === 'name' && e.metaKey)) {
-        // Cmd+Enter or Enter on last field = submit
+      if (field === 'name' && e.metaKey) {
         handleSubmit()
       } else if (field === 'name') {
         portRef.current?.focus()
       } else if (field === 'port') {
-        // Focus the type button area — just cycle and move on
-        micRef.current?.focus()
+        // Submit if we have a name — mic is optional
+        handleSubmit()
       }
     }
     if (e.key === 'Tab' && field === 'name' && !e.shiftKey) {
@@ -159,13 +189,11 @@ export function QuickAddRow({ showId, groupId, channelCount, onChannelAdded, aut
       </button>
 
       {/* Mic model */}
-      <Input
-        ref={micRef}
-        value={mic}
-        onChange={e => setMic(e.target.value)}
-        onKeyDown={e => handleKeyDown(e, 'mic')}
+      <MicSelect
+        value={mic || null}
+        onChange={(v) => { setMic(v); handleSubmitAfterMic(v) }}
+        compact
         placeholder="Mic"
-        className="h-6 text-xs border-transparent bg-transparent px-1 placeholder:text-muted-foreground/30 focus:bg-background focus:border-input"
       />
 
       {/* 48V placeholder */}

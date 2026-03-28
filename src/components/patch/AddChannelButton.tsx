@@ -3,6 +3,7 @@
 import { useState, forwardRef, useImperativeHandle } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { MicSelect } from './MicSelect'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -131,7 +132,7 @@ export const AddChannelButton = forwardRef<{ open: () => void }, AddChannelButto
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Mic model</Label>
-                <Input value={micModel} onChange={e => setMicModel(e.target.value)} placeholder="SM57" className="text-xs" />
+                <MicSelect value={micModel || null} onChange={setMicModel} placeholder="Search mics..." />
               </div>
             </div>
             {groups.length > 0 && (

@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { InputTypeBadge, PhantomBadge, ChangedBadge } from './ChangeBadge'
+import { MicSelect } from './MicSelect'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Channel, ChangelogEntry, InputType } from '@/lib/types'
@@ -137,7 +138,26 @@ export function ChannelRow({ channel, changes, isEditor, onUpdate }: ChannelRowP
       </div>
 
       {/* Mic model */}
-      <EditableCell field="mic_model" value={channel.mic_model || ''} className="text-muted-foreground" />
+      {editing === 'mic_model' ? (
+        <MicSelect
+          value={channel.mic_model}
+          onChange={(v) => {
+            setEditing(null)
+            if (v === (channel.mic_model || '')) return
+            const updated = { ...channel, mic_model: v || null }
+            onUpdate(updated)
+            supabase.from('channels').update({ mic_model: v || null }).eq('id', channel.id)
+          }}
+          compact
+        />
+      ) : (
+        <span
+          className={cn('truncate text-xs text-muted-foreground', isEditor && 'editable-cell')}
+          onClick={() => { if (isEditor) setEditing('mic_model') }}
+        >
+          {channel.mic_model || <span className="text-muted-foreground/30">&mdash;</span>}
+        </span>
+      )}
 
       {/* Phantom */}
       <div
