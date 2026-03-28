@@ -27,7 +27,7 @@ export function NavBar({ userName }: { userName?: string | null }) {
             alt="PatchList"
             width={100}
             height={100}
-            className="dark:invert-0 invert h-7 w-auto opacity-80 group-hover:opacity-100 transition-opacity"
+            className="dark:invert-0 invert h-14 w-auto opacity-80 group-hover:opacity-100 transition-opacity"
           />
         </Link>
         <div className="flex items-center gap-1">
