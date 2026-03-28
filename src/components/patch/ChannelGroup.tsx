@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { ChannelRow } from './ChannelRow'
 import { QuickAddRow } from './QuickAddRow'
@@ -19,6 +20,29 @@ interface ChannelGroupProps {
 
 export function ChannelGroup({ showId, group, channels, changelog, isEditor, totalChannelCount, onUpdateChannel, onChannelAdded }: ChannelGroupProps) {
   const [collapsed, setCollapsed] = useState(false)
+  const supabase = createClient()
+
+  function addBlankRow() {
+    const id = crypto.randomUUID()
+    const blank: Channel = {
+      id,
+      show_id: showId,
+      channel_number: totalChannelCount + 1,
+      name: '',
+      stage_port: null,
+      input_type: null,
+      mic_model: null,
+      phantom_48v: false,
+      notes: null,
+      sort_order: totalChannelCount,
+      group_id: group?.id || null,
+    }
+    onChannelAdded(blank)
+    supabase.from('channels').insert({
+      id, show_id: showId, channel_number: blank.channel_number,
+      name: '', group_id: blank.group_id, sort_order: blank.sort_order,
+    })
+  }
 
   const groupChanges = new Map<string, ChangelogEntry[]>()
   for (const entry of changelog) {
@@ -77,12 +101,22 @@ export function ChannelGroup({ showId, group, channels, changelog, isEditor, tot
             <p className="px-4 py-6 text-center text-xs text-muted-foreground/60">No channels in this group</p>
           )}
           {isEditor && (
-            <QuickAddRow
-              showId={showId}
-              groupId={group?.id || null}
-              channelCount={totalChannelCount}
-              onChannelAdded={onChannelAdded}
-            />
+            <>
+              <QuickAddRow
+                showId={showId}
+                groupId={group?.id || null}
+                channelCount={totalChannelCount}
+                onChannelAdded={onChannelAdded}
+              />
+              <div className="flex items-center px-3 py-1">
+                <button
+                  onClick={addBlankRow}
+                  className="text-[10px] text-muted-foreground/40 hover:text-muted-foreground transition-colors cursor-pointer"
+                >
+                  + Blank row
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}

@@ -46,15 +46,15 @@ export function QuickAddRow({ showId, groupId, channelCount, onChannelAdded, aut
     setInputType(next.value)
   }
 
-  async function handleSubmit() {
-    if (!name.trim()) return
-
+  async function handleSubmit(overrideName?: string) {
+    const channelName = overrideName ?? name.trim()
+    // Allow blank rows — name defaults to empty string
     const id = crypto.randomUUID()
     const newChannel: Channel = {
       id,
       show_id: showId,
       channel_number: channelCount + 1,
-      name: name.trim(),
+      name: channelName || '',
       stage_port: port.trim() || null,
       input_type: inputType,
       mic_model: mic.trim() || null,
@@ -88,14 +88,12 @@ export function QuickAddRow({ showId, groupId, channelCount, onChannelAdded, aut
 
   // Called when mic is selected from dropdown — auto-submit
   function handleSubmitAfterMic(selectedMic: string) {
-    if (!name.trim()) return
-    // Use the selected mic value directly since setState is async
     const id = crypto.randomUUID()
     const newChannel: Channel = {
       id,
       show_id: showId,
       channel_number: channelCount + 1,
-      name: name.trim(),
+      name: name.trim() || '',
       stage_port: port.trim() || null,
       input_type: inputType,
       mic_model: selectedMic || null,
