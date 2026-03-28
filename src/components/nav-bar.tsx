@@ -21,17 +21,14 @@ export function NavBar({ userName }: { userName?: string | null }) {
   return (
     <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md no-print">
       <div className="mx-auto flex h-11 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="group flex items-center gap-2">
+        <Link href="/" className="group flex items-center">
           <Image
             src="/logo.png"
             alt="PatchList"
-            width={22}
-            height={22}
-            className="dark:invert-0 invert"
+            width={100}
+            height={100}
+            className="dark:invert-0 invert h-7 w-auto opacity-80 group-hover:opacity-100 transition-opacity"
           />
-          <span className="text-sm font-semibold tracking-tight opacity-70 group-hover:opacity-100 transition-opacity">
-            PatchList
-          </span>
         </Link>
         <div className="flex items-center gap-1">
           {userName && (
