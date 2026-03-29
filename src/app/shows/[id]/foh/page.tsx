@@ -12,7 +12,7 @@ import type { Channel } from '@/lib/types'
 
 export default function FOHPage() {
   const { id } = useParams<{ id: string }>()
-  const { channels, groups, changelog, isEditor, loading, setChannels } = useShow(id)
+  const { channels, groups, changelog, unackedChangelog, isEditor, loading, setChannels, acknowledgeAll } = useShow(id)
   const addButtonRef = useRef<{ open: () => void }>(null)
 
   function handleUpdateChannel(updated: Channel) {
@@ -70,7 +70,7 @@ export default function FOHPage() {
   const ungrouped = groupedChannels.get(null) || []
 
   const wirelessCount = channels.filter(ch => ch.input_type === 'wireless').length
-  const changeCount = new Set(changelog.map(c => c.channel_id).filter(Boolean)).size
+  const changeCount = new Set(unackedChangelog.map(c => c.channel_id).filter(Boolean)).size
 
   return (
     <div>
@@ -99,7 +99,7 @@ export default function FOHPage() {
               onChannelAdded={handleChannelAdded}
             />
           )}
-          <ChangelogDrawer changelog={changelog} />
+          <ChangelogDrawer changelog={changelog} unackedCount={unackedChangelog.length} onAcknowledgeAll={acknowledgeAll} />
           <PDFExportButton />
         </div>
       </div>
@@ -130,7 +130,7 @@ export default function FOHPage() {
           showId={id}
           group={group}
           channels={groupedChannels.get(group.id) || []}
-          changelog={changelog}
+          changelog={unackedChangelog}
           isEditor={isEditor}
           totalChannelCount={channels.length}
           onUpdateChannel={handleUpdateChannel}
@@ -144,7 +144,7 @@ export default function FOHPage() {
           showId={id}
           group={null}
           channels={ungrouped}
-          changelog={changelog}
+          changelog={unackedChangelog}
           isEditor={isEditor}
           totalChannelCount={channels.length}
           onUpdateChannel={handleUpdateChannel}

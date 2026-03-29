@@ -14,9 +14,15 @@ export function useShow(showId: string) {
   const [mixNotes, setMixNotes] = useState<MixNote[]>([])
   const [wirelessEntries, setWirelessEntries] = useState<Wireless[]>([])
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([])
+  const [ackedAt, setAckedAt] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   const isEditor = permission === 'editor'
+
+  // Unacknowledged changes only
+  const unackedChangelog = ackedAt
+    ? changelog.filter(c => new Date(c.changed_at) > new Date(ackedAt))
+    : changelog
 
   const fetchAll = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -30,6 +36,7 @@ export function useShow(showId: string) {
       mixesRes,
       wirelessRes,
       changelogRes,
+      ackRes,
     ] = await Promise.all([
       supabase.from('shows').select('*').eq('id', showId).single(),
       supabase.from('show_users').select('permission').eq('show_id', showId).eq('user_id', user.id).single(),
@@ -38,6 +45,7 @@ export function useShow(showId: string) {
       supabase.from('mixes').select('*').eq('show_id', showId).order('sort_order'),
       supabase.from('wireless').select('*, channel:channels(*)').eq('show_id', showId),
       supabase.from('changelog').select('*, channel:channels(id, name), user:users(id, name)').eq('show_id', showId).order('changed_at', { ascending: false }).limit(100),
+      supabase.from('changelog_acks').select('acked_at').eq('show_id', showId).eq('user_id', user.id).single(),
     ])
 
     if (showRes.data) setShow(showRes.data)
@@ -46,7 +54,6 @@ export function useShow(showId: string) {
     if (groupsRes.data) setGroups(groupsRes.data)
     if (mixesRes.data) {
       setMixes(mixesRes.data)
-      // Fetch mix notes for all mixes
       const mixIds = mixesRes.data.map(m => m.id)
       if (mixIds.length > 0) {
         const { data: notes } = await supabase
@@ -59,6 +66,7 @@ export function useShow(showId: string) {
     }
     if (wirelessRes.data) setWirelessEntries(wirelessRes.data)
     if (changelogRes.data) setChangelog(changelogRes.data)
+    if (ackRes.data) setAckedAt(ackRes.data.acked_at)
 
     setLoading(false)
   }, [showId, supabase])
@@ -75,7 +83,6 @@ export function useShow(showId: string) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'channels', filter: `show_id=eq.${showId}` }, (payload) => {
         if (payload.eventType === 'INSERT') {
           setChannels(prev => {
-            // Deduplicate — optimistic add may have already placed this
             if (prev.some(ch => ch.id === (payload.new as Channel).id)) return prev
             return [...prev, payload.new as Channel].sort((a, b) => a.sort_order - b.sort_order)
           })
@@ -99,7 +106,6 @@ export function useShow(showId: string) {
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mix_notes' }, (payload) => {
         const note = payload.new as MixNote
-        // Check if this note is for a mix in our show
         const isMixInShow = mixes.some(m => m.id === note.mix_id)
         if (isMixInShow) {
           setMixNotes(prev => [note, ...prev])
@@ -115,6 +121,20 @@ export function useShow(showId: string) {
     }
   }, [showId, supabase, mixes])
 
+  // Acknowledge all changes up to now
+  async function acknowledgeAll() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const now = new Date().toISOString()
+    await supabase.from('changelog_acks').upsert({
+      user_id: user.id,
+      show_id: showId,
+      acked_at: now,
+    })
+    setAckedAt(now)
+  }
+
   return {
     show,
     permission,
@@ -125,9 +145,12 @@ export function useShow(showId: string) {
     mixNotes,
     wirelessEntries,
     changelog,
+    unackedChangelog,
+    ackedAt,
     loading,
     refetch: fetchAll,
     setChannels,
     setMixes,
+    acknowledgeAll,
   }
 }
