@@ -119,13 +119,11 @@ export function QuickAddRow({ showId, groupId, channelCount, onChannelAdded, aut
   function handleKeyDown(e: React.KeyboardEvent, field: 'name' | 'port') {
     if (e.key === 'Enter') {
       e.preventDefault()
-      if (field === 'name' && !name.trim()) return
-      if (field === 'name' && e.metaKey) {
+      // Enter on name = submit immediately (fast entry)
+      // Tab on name = go to port for detail entry
+      if (field === 'name') {
         handleSubmit()
-      } else if (field === 'name') {
-        portRef.current?.focus()
       } else if (field === 'port') {
-        // Submit if we have a name — mic is optional
         handleSubmit()
       }
     }

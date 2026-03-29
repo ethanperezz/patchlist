@@ -1,12 +1,14 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useShow } from '@/lib/hooks/use-show'
 import { ChannelGroup } from '@/components/patch/ChannelGroup'
 import { ChangelogDrawer } from '@/components/patch/ChangelogDrawer'
 import { PDFExportButton } from '@/components/patch/PDFExportButton'
 import { AddChannelButton } from '@/components/patch/AddChannelButton'
+import { BatchAddChannels } from '@/components/patch/BatchAddChannels'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Channel } from '@/lib/types'
 
@@ -14,6 +16,9 @@ export default function FOHPage() {
   const { id } = useParams<{ id: string }>()
   const { channels, groups, changelog, unackedChangelog, isEditor, loading, setChannels, acknowledgeAll } = useShow(id)
   const addButtonRef = useRef<{ open: () => void }>(null)
+  const [locked, setLocked] = useState(false)
+
+  const editingEnabled = isEditor && !locked
 
   function handleUpdateChannel(updated: Channel) {
     setChannels(prev => prev.map(ch => ch.id === updated.id ? updated : ch))
@@ -26,12 +31,19 @@ export default function FOHPage() {
     })
   }
 
+  function handleBatchAdded(newChannels: Channel[]) {
+    setChannels(prev => {
+      const ids = new Set(prev.map(ch => ch.id))
+      const unique = newChannels.filter(ch => !ids.has(ch.id))
+      return [...prev, ...unique].sort((a, b) => a.sort_order - b.sort_order)
+    })
+  }
+
   // Keyboard shortcuts
   useEffect(() => {
-    if (!isEditor) return
+    if (!editingEnabled) return
 
     function handleKeyDown(e: KeyboardEvent) {
-      // Cmd+N or Ctrl+N — open add channel dialog
       if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
         e.preventDefault()
         addButtonRef.current?.open()
@@ -40,7 +52,7 @@ export default function FOHPage() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isEditor])
+  }, [editingEnabled])
 
   if (loading) {
     return (
@@ -91,13 +103,37 @@ export default function FOHPage() {
 
         <div className="ml-auto flex items-center gap-2">
           {isEditor && (
-            <AddChannelButton
-              ref={addButtonRef}
-              showId={id}
-              groups={groups}
-              channelCount={channels.length}
-              onChannelAdded={handleChannelAdded}
-            />
+            <Button
+              variant={locked ? 'default' : 'ghost'}
+              size="sm"
+              className="h-8 text-[11px] font-normal gap-1"
+              onClick={() => setLocked(!locked)}
+              title={locked ? 'Unlock for editing' : 'Lock to view-only'}
+            >
+              {locked ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+              )}
+              {locked ? 'Locked' : 'Lock'}
+            </Button>
+          )}
+          {editingEnabled && (
+            <>
+              <BatchAddChannels
+                showId={id}
+                groups={groups}
+                channelCount={channels.length}
+                onChannelsAdded={handleBatchAdded}
+              />
+              <AddChannelButton
+                ref={addButtonRef}
+                showId={id}
+                groups={groups}
+                channelCount={channels.length}
+                onChannelAdded={handleChannelAdded}
+              />
+            </>
           )}
           <ChangelogDrawer changelog={changelog} unackedCount={unackedChangelog.length} onAcknowledgeAll={acknowledgeAll} />
           <PDFExportButton />
@@ -105,10 +141,11 @@ export default function FOHPage() {
       </div>
 
       {/* Keyboard hints */}
-      {isEditor && (
+      {editingEnabled && (
         <div className="mb-3 flex items-center gap-4 text-[10px] text-muted-foreground/40 no-print">
           <span><kbd className="rounded border border-border/50 px-1 py-0.5 text-[9px] font-mono">Cmd+N</kbd> Add channel</span>
           <span>Type in any row to quick-add</span>
+          <span>Enter to submit from name</span>
         </div>
       )}
 
@@ -131,7 +168,7 @@ export default function FOHPage() {
           group={group}
           channels={groupedChannels.get(group.id) || []}
           changelog={unackedChangelog}
-          isEditor={isEditor}
+          isEditor={editingEnabled}
           totalChannelCount={channels.length}
           onUpdateChannel={handleUpdateChannel}
           onChannelAdded={handleChannelAdded}
@@ -145,7 +182,7 @@ export default function FOHPage() {
           group={null}
           channels={ungrouped}
           changelog={unackedChangelog}
-          isEditor={isEditor}
+          isEditor={editingEnabled}
           totalChannelCount={channels.length}
           onUpdateChannel={handleUpdateChannel}
           onChannelAdded={handleChannelAdded}
