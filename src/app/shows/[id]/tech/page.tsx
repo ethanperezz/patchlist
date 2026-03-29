@@ -11,7 +11,7 @@ import { useState } from 'react'
 
 export default function TechPage() {
   const { id } = useParams<{ id: string }>()
-  const { show, channels, wirelessEntries, isEditor, loading } = useShow(id)
+  const { show, channels, groups, mixes, mixNotes, wirelessEntries, changelog, isEditor, loading } = useShow(id)
   const [stageNotes, setStageNotes] = useState(show?.show_notes || '')
   const supabase = createClient()
 
@@ -37,7 +37,7 @@ export default function TechPage() {
     <div>
       <div className="mb-4 flex items-center justify-between no-print">
         <h2 className="text-sm font-semibold">Stage Tech View</h2>
-        <PDFExportButton />
+        <PDFExportButton show={show} channels={channels} groups={groups} mixes={mixes} mixNotes={mixNotes} wirelessEntries={wirelessEntries} changelog={changelog} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

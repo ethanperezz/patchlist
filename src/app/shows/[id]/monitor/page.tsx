@@ -10,7 +10,7 @@ import type { Mix } from '@/lib/types'
 
 export default function MonitorPage() {
   const { id } = useParams<{ id: string }>()
-  const { mixes, mixNotes, isEditor, loading, setMixes } = useShow(id)
+  const { show, channels, groups, mixes, mixNotes, wirelessEntries, changelog, isEditor, loading, setMixes } = useShow(id)
 
   function handleUpdateMix(updated: Mix) {
     setMixes(prev => prev.map(m => m.id === updated.id ? updated : m))
@@ -43,7 +43,7 @@ export default function MonitorPage() {
           {isEditor && (
             <AddMixButton showId={id} mixCount={mixes.length} onMixAdded={handleMixAdded} />
           )}
-          <PDFExportButton />
+          <PDFExportButton show={show} channels={channels} groups={groups} mixes={mixes} mixNotes={mixNotes} wirelessEntries={wirelessEntries} changelog={changelog} />
         </div>
       </div>
 

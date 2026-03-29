@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function BandPage() {
   const { id } = useParams<{ id: string }>()
-  const { channels, groups, loading } = useShow(id)
+  const { show, channels, groups, mixes, mixNotes, wirelessEntries, changelog, loading } = useShow(id)
 
   if (loading) {
     return <Skeleton className="h-[300px]" />
@@ -28,7 +28,7 @@ export default function BandPage() {
     <div>
       <div className="mb-4 flex items-center justify-between no-print">
         <h2 className="text-sm font-semibold">Band View</h2>
-        <PDFExportButton />
+        <PDFExportButton show={show} channels={channels} groups={groups} mixes={mixes} mixNotes={mixNotes} wirelessEntries={wirelessEntries} changelog={changelog} />
       </div>
 
       <p className="mb-4 text-xs text-muted-foreground no-print">

@@ -14,7 +14,7 @@ import type { Channel } from '@/lib/types'
 
 export default function FOHPage() {
   const { id } = useParams<{ id: string }>()
-  const { channels, groups, changelog, unackedChangelog, isEditor, loading, setChannels, acknowledgeAll } = useShow(id)
+  const { show, channels, groups, mixes, mixNotes, wirelessEntries, changelog, unackedChangelog, isEditor, loading, setChannels, acknowledgeAll } = useShow(id)
   const addButtonRef = useRef<{ open: () => void }>(null)
   const [locked, setLocked] = useState(false)
 
@@ -136,7 +136,7 @@ export default function FOHPage() {
             </>
           )}
           <ChangelogDrawer changelog={changelog} unackedCount={unackedChangelog.length} onAcknowledgeAll={acknowledgeAll} />
-          <PDFExportButton />
+          <PDFExportButton show={show} channels={channels} groups={groups} mixes={mixes} mixNotes={mixNotes} wirelessEntries={wirelessEntries} changelog={changelog} />
         </div>
       </div>
 
